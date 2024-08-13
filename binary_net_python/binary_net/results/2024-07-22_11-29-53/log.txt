@@ -1,0 +1,5 @@
+2024-07-22 11:29:53 - INFO - saving to ./results/2024-07-22_11-29-53
+2024-07-22 11:29:53 - DEBUG - run arguments: Namespace(batch_size=512, dataset='cifar10', epochs=250, evaluate=None, gpus='0', input_size=32, lr=0.1, model='resnet_binary', model_config='', momentum=0.9, optimizer='SGD', print_freq=10, results_dir='./results', resume='', save='2024-07-22_11-29-53', start_epoch=0, type='torch.cuda.FloatTensor', weight_decay=0.0001, workers=8)
+2024-07-22 11:29:53 - INFO - creating model resnet_binary
+2024-07-22 11:29:53 - INFO - created model with configuration: {'input_size': 32, 'dataset': 'cifar10'}
+2024-07-22 11:29:53 - INFO - number of parameters: 2004910

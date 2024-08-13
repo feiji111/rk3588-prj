@@ -1,0 +1,7 @@
+[
+{
+  "directory": "/home/kjzhang/Desktop/北航27所合作资料库/video_stream/pull/build",
+  "command": "/usr/bin/c++  -isystem /usr/local/include/opencv4 -std=gnu++11 -o CMakeFiles/pull.dir/pull-v2.cpp.o -c /home/kjzhang/Desktop/北航27所合作资料库/video_stream/pull/pull-v2.cpp",
+  "file": "/home/kjzhang/Desktop/北航27所合作资料库/video_stream/pull/pull-v2.cpp"
+}
+]

@@ -1,0 +1,47 @@
+cmake_minimum_required(VERSION 3.0.0)
+project(detect_track VERSION 0.1.0)
+
+# Need C++ 11
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
+option(DEBUG "Debug or Release" ON)
+
+if(DEBUG)
+    add_definitions("-DDEBUG")
+endif(DEBUG)
+
+find_package(OpenCV REQUIRED)
+
+message(STATUS "    version: ${OpenCV_VERSION}")
+message(STATUS "    libraries: ${OpenCV_LIBS}")
+message(STATUS "    include path: ${OpenCV_INCLUDE_DIRS}")
+
+include_directories(${OpenCV_INCLUDE_DIRS})
+
+set(
+    include_libs  
+    ${PROJECT_SOURCE_DIR}/include/
+    ${PROJECT_SOURCE_DIR}/include/rga/
+    ${PROJECT_SOURCE_DIR}/include/rknn_api/
+    ${PROJECT_SOURCE_DIR}/include/threadpool/
+)
+
+include_directories(${include_libs})
+
+aux_source_directory(${PROJECT_SOURCE_DIR}/src DETECTION_SRC_DIR)
+add_executable(detect_track ${PROJECT_SOURCE_DIR}/main.cpp ${DETECTION_SRC_DIR})
+
+# 添加动态链接库
+set(
+    dynamic_libs  
+    pthread
+    ${PROJECT_SOURCE_DIR}/lib/rknn_api/librknnrt.so
+    ${PROJECT_SOURCE_DIR}/lib/rga/librga.so
+)
+
+# debug
+# add_definitions("-g")
+
+target_link_libraries(detect_track ${OpenCV_LIBS})
+target_link_libraries(detect_track ${dynamic_libs})

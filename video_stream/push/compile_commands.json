@@ -1,0 +1,7 @@
+[
+{
+  "directory": "/home/kjzhang/Desktop/北航27所合作资料库/video_stream/push/build",
+  "command": "/usr/bin/c++  -isystem /usr/local/include/opencv4   -g -std=gnu++11 -o CMakeFiles/push.dir/push.cpp.o -c /home/kjzhang/Desktop/北航27所合作资料库/video_stream/push/push.cpp",
+  "file": "/home/kjzhang/Desktop/北航27所合作资料库/video_stream/push/push.cpp"
+}
+]

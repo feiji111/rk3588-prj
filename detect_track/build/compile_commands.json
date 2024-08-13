@@ -1,0 +1,27 @@
+[
+{
+  "directory": "/home/Tronlong/rk3588/detect_track/build",
+  "command": "/usr/bin/c++ -DDEBUG -I/home/Tronlong/rk3588/detect_track/include -I/home/Tronlong/rk3588/detect_track/include/rga -I/home/Tronlong/rk3588/detect_track/include/rknn_api -I/home/Tronlong/rk3588/detect_track/include/threadpool -isystem /usr/local/include/opencv4 -std=gnu++17 -o CMakeFiles/detect_track.dir/main.cpp.o -c /home/Tronlong/rk3588/detect_track/main.cpp",
+  "file": "/home/Tronlong/rk3588/detect_track/main.cpp"
+},
+{
+  "directory": "/home/Tronlong/rk3588/detect_track/build",
+  "command": "/usr/bin/c++ -DDEBUG -I/home/Tronlong/rk3588/detect_track/include -I/home/Tronlong/rk3588/detect_track/include/rga -I/home/Tronlong/rk3588/detect_track/include/rknn_api -I/home/Tronlong/rk3588/detect_track/include/threadpool -isystem /usr/local/include/opencv4 -std=gnu++17 -o CMakeFiles/detect_track.dir/src/coreNum.cpp.o -c /home/Tronlong/rk3588/detect_track/src/coreNum.cpp",
+  "file": "/home/Tronlong/rk3588/detect_track/src/coreNum.cpp"
+},
+{
+  "directory": "/home/Tronlong/rk3588/detect_track/build",
+  "command": "/usr/bin/c++ -DDEBUG -I/home/Tronlong/rk3588/detect_track/include -I/home/Tronlong/rk3588/detect_track/include/rga -I/home/Tronlong/rk3588/detect_track/include/rknn_api -I/home/Tronlong/rk3588/detect_track/include/threadpool -isystem /usr/local/include/opencv4 -std=gnu++17 -o CMakeFiles/detect_track.dir/src/model.cpp.o -c /home/Tronlong/rk3588/detect_track/src/model.cpp",
+  "file": "/home/Tronlong/rk3588/detect_track/src/model.cpp"
+},
+{
+  "directory": "/home/Tronlong/rk3588/detect_track/build",
+  "command": "/usr/bin/c++ -DDEBUG -I/home/Tronlong/rk3588/detect_track/include -I/home/Tronlong/rk3588/detect_track/include/rga -I/home/Tronlong/rk3588/detect_track/include/rknn_api -I/home/Tronlong/rk3588/detect_track/include/threadpool -isystem /usr/local/include/opencv4 -std=gnu++17 -o CMakeFiles/detect_track.dir/src/postprocess.cpp.o -c /home/Tronlong/rk3588/detect_track/src/postprocess.cpp",
+  "file": "/home/Tronlong/rk3588/detect_track/src/postprocess.cpp"
+},
+{
+  "directory": "/home/Tronlong/rk3588/detect_track/build",
+  "command": "/usr/bin/c++ -DDEBUG -I/home/Tronlong/rk3588/detect_track/include -I/home/Tronlong/rk3588/detect_track/include/rga -I/home/Tronlong/rk3588/detect_track/include/rknn_api -I/home/Tronlong/rk3588/detect_track/include/threadpool -isystem /usr/local/include/opencv4 -std=gnu++17 -o CMakeFiles/detect_track.dir/src/preprocess.cpp.o -c /home/Tronlong/rk3588/detect_track/src/preprocess.cpp",
+  "file": "/home/Tronlong/rk3588/detect_track/src/preprocess.cpp"
+}
+]

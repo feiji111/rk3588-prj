@@ -1,0 +1,3 @@
+/home/Tronlong/rknn/build/CMakeFiles/rebuild_cache.dir
+/home/Tronlong/rknn/build/CMakeFiles/edit_cache.dir
+/home/Tronlong/rknn/build/CMakeFiles/rknn.dir

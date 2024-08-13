@@ -1,0 +1,10 @@
+2024-04-20 19:11:14 - INFO - saving to ./results/resnet18_binary
+2024-04-20 19:11:14 - DEBUG - run arguments: Namespace(batch_size=512, dataset='cifar10', epochs=250, evaluate=None, gpus='0', input_size=32, lr=0.1, model='resnet_binary', model_config='', momentum=0.9, optimizer='SGD', print_freq=10, results_dir='./results', resume='', save='resnet18_binary', start_epoch=0, type='torch.cuda.FloatTensor', weight_decay=0.0001, workers=8)
+2024-04-20 19:11:14 - INFO - creating model resnet_binary
+2024-04-20 19:11:14 - INFO - created model with configuration: {'input_size': 32, 'dataset': 'cifar10'}
+2024-04-20 19:11:14 - INFO - number of parameters: 2004910
+2024-04-20 19:11:14 - INFO - training regime: {0: {'optimizer': 'Adam', 'lr': 0.005}, 101: {'lr': 0.001}, 142: {'lr': 0.0005}, 184: {'lr': 0.0001}, 220: {'lr': 1e-05}}
+2024-04-20 19:11:14 - DEBUG - OPTIMIZER - setting method = Adam
+2024-04-20 19:11:14 - DEBUG - OPTIMIZER - setting lr = 0.005
+2024-04-20 19:11:18 - INFO - TRAINING - Epoch: [0][0/12]	Time 3.217 (3.217)	Data 0.256 (0.256)	Loss 2.6403 (2.6403)	Prec@1 9.180 (9.180)	Prec@5 55.859 (55.859)
+2024-04-20 19:11:20 - INFO - TRAINING - Epoch: [0][10/12]	Time 0.296 (0.546)	Data 0.000 (0.023)	Loss 1.7500 (1.9534)	Prec@1 78.906 (58.043)	Prec@5 88.477 (79.297)

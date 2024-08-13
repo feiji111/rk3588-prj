@@ -1,0 +1,3 @@
+/home/Tronlong/rk3588/detect_track/build/CMakeFiles/rebuild_cache.dir
+/home/Tronlong/rk3588/detect_track/build/CMakeFiles/edit_cache.dir
+/home/Tronlong/rk3588/detect_track/build/CMakeFiles/detect_track.dir

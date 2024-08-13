@@ -1,0 +1,3 @@
+/home/Tronlong/video_stream/pull/build/CMakeFiles/rebuild_cache.dir
+/home/Tronlong/video_stream/pull/build/CMakeFiles/edit_cache.dir
+/home/Tronlong/video_stream/pull/build/CMakeFiles/pull.dir
