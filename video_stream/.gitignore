@@ -1,0 +1,6 @@
+pull/build/
+push/build/
+pull/.cache/
+push/.cache/
+pull/compile_commands.json
+push/compile_commands.json

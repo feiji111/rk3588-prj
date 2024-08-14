@@ -1,3 +1,0 @@
-/home/Tronlong/video_stream/push/build/CMakeFiles/rebuild_cache.dir
-/home/Tronlong/video_stream/push/build/CMakeFiles/edit_cache.dir
-/home/Tronlong/video_stream/push/build/CMakeFiles/push.dir

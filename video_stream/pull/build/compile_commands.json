@@ -1,7 +1,0 @@
-[
-{
-  "directory": "/home/Tronlong/video_stream/pull/build",
-  "command": "/usr/bin/c++  -I/usr/local/ffmpeg/include -isystem /usr/local/include/opencv4   -g -std=gnu++11 -o CMakeFiles/pull.dir/pull-v2.cpp.o -c /home/Tronlong/video_stream/pull/pull-v2.cpp",
-  "file": "/home/Tronlong/video_stream/pull/pull-v2.cpp"
-}
-]

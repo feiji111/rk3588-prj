@@ -5,7 +5,7 @@
 
 int main() {
     // FFmpeg命令行参数
-    const char* ffmpegCommand = "/usr/local/ffmpeg/bin/ffmpeg -i udp://localhost:1234 -f rawvideo -pix_fmt bgr24 -";
+    const char* ffmpegCommand = "/usr/local/ffmpeg/bin/ffmpeg -i rtsp://10.42.0.1:8554/camera -f rawvideo -pix_fmt bgr24 -";
 
     // 输出FFmpeg命令
     std::cout << "Running command: " << ffmpegCommand << std::endl;

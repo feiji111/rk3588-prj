@@ -20,8 +20,8 @@ int main(int argc, char*argv[]) {
     // cap.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('Y', 'U', 'Y', 'V'));
 
     // FFmpeg命令行参数
-    const char* ffmpegCommand = "/usr/local/ffmpeg/bin/ffmpeg -re -f rawvideo -pix_fmt bgr24 -s 640x480 -i - -c:v libx264 -pix_fmt yuv422p -preset veryfast -tune zerolatency -f rtsp rtsp://10.42.0.1:8554/mystream";
-
+    const char* ffmpegCommand = "/usr/local/ffmpeg/bin/ffmpeg -re -f rawvideo -pix_fmt bgr24 -s 640x480 -i - -c:v libx264 -pix_fmt bgr24 -preset veryfast -tune zerolatency -f rtsp -rtsp_transport tcp rtsp://10.42.0.1:8554/camera";
+    // const char* ffmpegCommand = "/usr/local/ffmpeg/bin/ffmpeg -f rawvideo -pix_fmt yuv444p -s 640x480 -i - -c:v libx264 -pix_fmt yuv444p -f rtsp -rtsp_transport tcp rtsp://10.42.0.1:8554/camera";
     // 输出FFmpeg命令
     std::cout << "Running command: " << ffmpegCommand << std::endl;
 
