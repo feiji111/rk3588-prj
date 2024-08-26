@@ -6,6 +6,7 @@
 
 //C++ standard library headers
 #include <vector>
+#include <iostream>
 
 //other libraries' headers
 #include "rknn_api.h"
@@ -56,6 +57,10 @@ void compute_dfl(float* tensor, int dfl_len, float* box){
 int post_process(rknn_app_context_t *app_ctx, rknn_output *outputs)
 {
     std::vector<double> prob;
+    int *result = (int*)(outputs[0].buf);
+    for(int i = 0;i < 10;i++) {
+        prob.push_back(result[i]);
+    }
 
     return argmax(prob);
 }

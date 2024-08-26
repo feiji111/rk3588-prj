@@ -78,7 +78,7 @@ private:
     rknn_input inputs;
 
 public:
-    NanoTrack_head(const std::string& model_path);
+    NanoTrack_X_backbone(const std::string& model_path);
     int init(rknn_context *ctx_in, bool isChild = false);
     rknn_context *get_pctx();
     int infer(cv::Mat img, cv::Mat target);

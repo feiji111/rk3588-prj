@@ -13,7 +13,7 @@ extern "C" {
 
 int main(int argc, char* argv[]) {
     AVFormatContext* formatContext = nullptr;
-    const char* url = "udp://localhost:1234";
+    const char* url = "rtsp://10.42.0.1:8554/camera";
 
     // 初始化 libavformat 和注册所有格式和编解码器
     // av_register_all();

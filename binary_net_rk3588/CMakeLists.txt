@@ -17,5 +17,6 @@ set(dynamic_libs
 aux_source_directory(${PROJECT_SOURCE_DIR}/src SRC_DIR)
 
 add_executable(rknn ${PROJECT_SOURCE_DIR}/main.cpp ${SRC_DIR})
+add_definitions("-Wall -g")
 
 target_link_libraries(rknn ${dynamic_libs})

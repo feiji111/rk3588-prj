@@ -147,15 +147,15 @@ int release_model(rknn_app_context_t *app_ctx)
     return 0;
 }
 
-int inference_model(rknn_app_context_t *app_ctx, const cv::Mat& input, rknn_output*outputs)
+int inference_model(rknn_app_context_t *app_ctx, const cv::Mat& input, rknn_output**outputs)
 {
     int ret;
     rknn_input inputs[app_ctx->io_num.n_input];
-    
-    outputs = (rknn_output*)malloc(app_ctx->io_num.n_output * sizeof(rknn_output));
+
+    *outputs = (rknn_output*)malloc(app_ctx->io_num.n_output * sizeof(rknn_output));
     
     memset(inputs, 0, sizeof(inputs));
-    memset(outputs, 0, sizeof(rknn_output) * app_ctx->io_num.n_output);
+    memset(*outputs, 0, sizeof(rknn_output) * app_ctx->io_num.n_output);
 
     // Set Input Data
     inputs[0].index = 0;
@@ -172,7 +172,7 @@ int inference_model(rknn_app_context_t *app_ctx, const cv::Mat& input, rknn_outp
     }
 
     // Run
-    printf("rknn_run\n");
+    // printf("rknn_run\n");
     ret = rknn_run(app_ctx->rknn_ctx, nullptr);
     if (ret < 0)
     {
@@ -183,10 +183,10 @@ int inference_model(rknn_app_context_t *app_ctx, const cv::Mat& input, rknn_outp
     // Get Output
     for (int i = 0; i < app_ctx->io_num.n_output; i++)
     {
-        outputs[i].index = i;
-        outputs[i].want_float = (!app_ctx->is_quant);
+        (*outputs)[i].index = i;
+        (*outputs)[i].want_float = (!app_ctx->is_quant);
     }
-    ret = rknn_outputs_get(app_ctx->rknn_ctx, app_ctx->io_num.n_output, outputs, NULL);
+    ret = rknn_outputs_get(app_ctx->rknn_ctx, app_ctx->io_num.n_output, *outputs, NULL);
     if (ret < 0)
     {
         printf("rknn_outputs_get fail! ret=%d\n", ret);

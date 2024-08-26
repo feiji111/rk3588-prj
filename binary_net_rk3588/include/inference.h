@@ -27,6 +27,6 @@ int init_model(const char* model_path, rknn_app_context_t* app_ctx);
 
 int release_model(rknn_app_context_t* app_ctx);
 
-int inference_model(rknn_app_context_t* app_ctx, const cv::Mat& input, rknn_output *outputs);
+int inference_model(rknn_app_context_t* app_ctx, const cv::Mat& input, rknn_output **outputs);
 
 #endif //RKNN_INCLUDE_INIT_MODEL_H_

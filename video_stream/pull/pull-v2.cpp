@@ -3,23 +3,29 @@
 #include <cstdlib>
 #include <vector>
 
-int main() {
+int main(int argc, char**argv) {
     // FFmpeg命令行参数
-    const char* ffmpegCommand = "/usr/local/ffmpeg/bin/ffmpeg -i rtsp://10.42.0.1:8554/camera -f rawvideo -pix_fmt bgr24 -";
+    if(argc < 4) {
+        printf("Usage %s <RTSP-url> <width> <height>\n", argv[0]);
+    }
+
+    std::string RTSP_url = argv[1];
+    std::string ffmpegCommand = "/usr/local/ffmpeg/bin/ffmpeg -c:v h264 -i " + RTSP_url +  " -f rawvideo -pix_fmt bgr24 -";
+    // const char* ffmpegCommand = "/usr/local/ffmpeg/bin/ffmpeg -i rtsp://10.42.0.1:8554/camera -f rawvideo -pix_fmt bgr24 -";
 
     // 输出FFmpeg命令
     std::cout << "Running command: " << ffmpegCommand << std::endl;
 
     // 使用popen创建FFmpeg进程
-    FILE* ffmpegPipe = popen(ffmpegCommand, "r");
+    FILE* ffmpegPipe = popen(ffmpegCommand.c_str(), "r");
     if (!ffmpegPipe) {
         std::cerr << "Failed to open pipe for pulling stream." << std::endl;
         return -1;
     }
 
     // 读取FFmpeg输出并使用OpenCV显示
-    const int width = 640;
-    const int height = 480;
+    const int width = atoi(argv[2]);
+    const int height = atoi(argv[3]);
     const int channels = 3; // YUYV422 has 2 channels
     std::vector<uchar> buffer(width * height * channels);
     cv::Mat bgrFrame;

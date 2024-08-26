@@ -330,8 +330,6 @@ int NanoTrack_head::init(rknn_context *ctx_in, bool isChild)
     return 0;
 }
 
-int
-
 rknn_context *rkYolov5s::get_pctx()
 {
     return &ctx;
