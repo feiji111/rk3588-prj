@@ -84,8 +84,8 @@ int main(int argc, char **argv)
     std::string height = argv[5];
     std::string resolution = width + 'x' + height;
     // std::string ffmpegCommand = "/usr/local/ffmpeg/bin/ffmpeg -re -f rawvideo -pix_fmt bgr24 -s " + resolution + " -i - -c:v libx264 -r 25 -pix_fmt yuv420p -preset veryfast -tune zerolatency -f rtsp -rtsp_transport udp " + rtsp_dest;
-    // std::string ffmpegCommand = "/usr/local/ffmpeg/bin/ffmpeg -f rawvideo -pix_fmt yuv420p -r 25 -s " + resolution + " -i - -c:v copy -f rtsp -rtsp_transport tcp " + rtsp_dest;
-    std::string ffmpegCommand = "/usr/local/ffmpeg/bin/ffmpeg -r 60 -i - -r 60 -c:v copy -f rtsp -rtsp_transport udp " + rtsp_dest;
+    // std::string ffmpegCommand = "/usr/local/ffmpeg/bin/ffmpeg -f rawvideo -pix_fmt yuv420p -r 25 -s " + resolution + " -i - -c:v copy -f rtsp -rtsp_transport udp " + rtsp_dest;
+    std::string ffmpegCommand = "/usr/local/ffmpeg/bin/ffmpeg -r 60 -i - -r 60 -c:v copy -f rtsp -rtsp_transport tcp " + rtsp_dest;
 
     printf("Running command: %s\n", ffmpegCommand.c_str());
 

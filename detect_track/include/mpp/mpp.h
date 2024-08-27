@@ -435,9 +435,11 @@ void YuvtoH264(int width, int height, cv::Mat yuv_frame, unsigned char* (&encode
         first_frame_flg = false;
         delete H264_buf;
         delete SPS_buf;
+        #ifdef DEBUG
         printf("first_frame! \n");
         printf("SPS length: %d! \n", SPS_length);
         printf("frame length: %d! \n", H264_buf_length);
+        #endif
     }
     else
     {
@@ -445,7 +447,9 @@ void YuvtoH264(int width, int height, cv::Mat yuv_frame, unsigned char* (&encode
         encode_buf = new unsigned char[H264_buf_length];
         memcpy(encode_buf, H264_buf, H264_buf_length);
         encode_length = H264_buf_length;
+        #ifdef DEBUG
         printf("frame length: %d! \n", H264_buf_length);
+        #endif
         delete H264_buf;
     }
 }
