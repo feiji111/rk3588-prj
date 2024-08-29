@@ -11,6 +11,7 @@
 #include "mpp_log.h"
 #include "mpp_time.h"
 #include "mpp_common.h"
+#include "rk_venc_cfg.h"
 
 typedef struct
 {
@@ -438,7 +439,7 @@ void YuvtoH264(int width, int height, cv::Mat yuv_frame, unsigned char* (&encode
         #ifdef DEBUG
         printf("first_frame! \n");
         printf("SPS length: %d! \n", SPS_length);
-        printf("frame length: %d! \n", H264_buf_length);
+        // printf("frame length: %d! \n", H264_buf_length);
         #endif
     }
     else
@@ -448,7 +449,7 @@ void YuvtoH264(int width, int height, cv::Mat yuv_frame, unsigned char* (&encode
         memcpy(encode_buf, H264_buf, H264_buf_length);
         encode_length = H264_buf_length;
         #ifdef DEBUG
-        printf("frame length: %d! \n", H264_buf_length);
+        // printf("frame length: %d! \n", H264_buf_length);
         #endif
         delete H264_buf;
     }

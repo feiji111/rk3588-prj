@@ -6,6 +6,7 @@
 
 #include <memory>
 
+//OpenCV
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
@@ -15,13 +16,21 @@
 #include "opencv2/imgproc/imgproc.hpp"
 #include <opencv2/tracking.hpp>
 #include <opencv2/core/ocl.hpp>
+//FFmpeg
+extern "C" {
+#include <libavcodec/avcodec.h>
+#include <libavcodec/packet.h>
+}
 
 #include "box.h"
 #include "common.h"
 #include "model.h"
 #include "rknnPool.hpp"
 #include "rknn_api.h"
-#include "mpp/mpp.h"
+#include "mpp/mpp-v2.h"
+#include "command.h"
+
+extern AVPacket *packet;
 
 struct MouseData {
     frameDets* dets;
@@ -73,42 +82,44 @@ void onMouseClick(int event, int x, int y, int flags, void* userdata)
 
 int main(int argc, char **argv)
 {
-    if (argc != 6)
-    {
-        printf("Usage: %s <detection_model> <cameraID/video_path> <RTSP-url> <width> <height>\n", argv[0]);
-        return -1;
-    }
+    Command cmd = process_command(argc, argv);
+    // if (argc != 6)
+    // {
+    //     printf("Usage: %s <detection_model> <cameraID/video_path> <RTSP-url> <width> <height>\n", argv[0]);
+    //     return -1;
+    // }
     //push stream
-    std::string rtsp_dest = argv[3];
-    std::string width = argv[4];
-    std::string height = argv[5];
-    std::string resolution = width + 'x' + height;
+    // std::string rtsp_dest = argv[3];
+    // std::string width = argv[4];
+    // std::string height = argv[5];
+    // std::string resolution = width + 'x' + height;
+    int int_width, int_height;
+    int_width = cmd.getWidth();
+    int_height = cmd.getHeight();
+
     // std::string ffmpegCommand = "/usr/local/ffmpeg/bin/ffmpeg -re -f rawvideo -pix_fmt bgr24 -s " + resolution + " -i - -c:v libx264 -r 25 -pix_fmt yuv420p -preset veryfast -tune zerolatency -f rtsp -rtsp_transport udp " + rtsp_dest;
     // std::string ffmpegCommand = "/usr/local/ffmpeg/bin/ffmpeg -f rawvideo -pix_fmt yuv420p -r 25 -s " + resolution + " -i - -c:v copy -f rtsp -rtsp_transport udp " + rtsp_dest;
-    std::string ffmpegCommand = "/usr/local/ffmpeg/bin/ffmpeg -r 60 -i - -r 60 -c:v copy -f rtsp -rtsp_transport tcp " + rtsp_dest;
+    // std::string ffmpegCommand = "/usr/local/ffmpeg/bin/ffmpeg -r 60 -i - -r 60 -c:v copy -f rtsp -rtsp_transport tcp " + rtsp_dest;
 
-    printf("Running command: %s\n", ffmpegCommand.c_str());
+    // printf("Running command: %s\n", ffmpegCommand.c_str());
 
-    FILE* ffmpegPipe = popen(ffmpegCommand.c_str(), "w");
-    if(!ffmpegPipe) {
-        fprintf(stderr, "Failed to open pipe for pushing stream.\n");
-        return -1;
-    }
+    // FILE* ffmpegPipe = popen(ffmpegCommand.c_str(), "w");
+    // if(!ffmpegPipe) {
+    //     fprintf(stderr, "Failed to open pipe for pushing stream.\n");
+    //     return -1;
+    // }
 
     //创建Linux FIFO文件
     // ::unlink("./test.264");
     // ::mkfifo("./test.264", O_CREAT | O_EXCL | 777);
     // FILE *fp_output = fopen("./test.264", "w+b");
 
-    char *model_name = NULL, *trk_model = NULL;
-    
-    // The path where the model is located
-    model_name = (char *)argv[1];
-    // camera or video path
-    char *vedio_name = argv[2];
-    // Initialize the rknn thread pool
+    std::string detection_model = cmd.getDetectionModel();
+    std::string track_model_head = cmd.getTrackModelHead();
+    std::string track_model_backbone = cmd.getTrackModelBackbone();
+
     int threadNum = 6;
-    rknnPool<rkYolov5s, cv::Mat, frameDets> testPool(model_name, threadNum);
+    rknnPool<rkYolov5s, cv::Mat, frameDets> testPool(detection_model, threadNum);
     // rknnPool<FeatureTensor, cv::Mat, cv::Mat> reidPool(trk_model, threadNum);
     
     if (testPool.init() != 0)
@@ -119,8 +130,8 @@ int main(int argc, char **argv)
 
     //init NanoTracker
     cv::TrackerNano::Params params;
-    params.backbone = "../model/nanotrack_backbone_sim.onnx";
-    params.neckhead = "../model/nanotrack_head_sim.onnx";
+    params.backbone = track_model_head.c_str();
+    params.neckhead = track_model_backbone.c_str();
 
     cv::Ptr<cv::TrackerNano> tracker = cv::TrackerNano::create(params);
 
@@ -132,16 +143,8 @@ int main(int argc, char **argv)
     cv::setMouseCallback("Camera", onMouseClick, &mouseData);
 
     cv::VideoCapture capture;
-    if (strlen(vedio_name) == 1) {
-        capture.open((int)(vedio_name[0] - '0'), cv::CAP_V4L2);
-        capture.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'));
-        capture.set(cv::CAP_PROP_FRAME_WIDTH, atoi(width.c_str()));
-        capture.set(cv::CAP_PROP_FRAME_HEIGHT, atoi(height.c_str()));
-    }
-    else {
-        capture.open(vedio_name, cv::CAP_FFMPEG);
-        // std::cout << capture.get(cv::CAP_PROP_FPS) << std::endl;
-    }
+    capture = capture_init(cmd);
+
     #ifdef DEBUG
     struct timeval time, time1, io_time;
     gettimeofday(&time, nullptr);
@@ -199,21 +202,35 @@ int main(int argc, char **argv)
 
 
         cv::Mat resultYUV;
-        cv::cvtColor(dets.img, resultYUV, cv::COLOR_BGR2YUV_I420);
-        uchar *h264_buf = nullptr;
-        int buf_len = 0;
-        YuvtoH264(atoi(width.c_str()), atoi(height.c_str()), resultYUV, h264_buf, buf_len); 
+
+        cv::cvtColor(dets.img, resultYUV, cv::COLOR_BGR2YUV_YV12);
+        // uchar *h264_buf = nullptr;
+        // int buf_len = 0;
+        // YuvtoH264(int_width, int_height, resultYUV, h264_buf, buf_len); 
         // std::cout << dets.img.rows << ' ' << dets.img.cols << std::endl;
         // gettimeofday(&io_time, nullptr);
         // auto before_io = io_time.tv_sec * 1000 + io_time.tv_usec / 1000;
         // fwrite(dets.img.data, 1, dets.img.total() * dets.img.elemSize(), ffmpegPipe);
-        fwrite(h264_buf, 1, buf_len, ffmpegPipe);
+
+        // fwrite(h264_buf, 1, buf_len, ffmpegPipe);
+        transfer_frame(resultYUV, cmd);
+
+        // Write the compressed frame to the media file
+        // if (av_interleaved_write_frame(output_format_context, &packet) < 0) {
+        //     fprintf(stderr, "Error while writing output packet\n");
+        //     return -1;
+        // }
+
+        // av_packet_unref(&packet);
+
         // gettimeofday(&io_time, nullptr);
         // auto after_io = io_time.tv_sec * 1000 + io_time.tv_usec / 1000;
 
         // printf("i/o time: %ldms\n", after_io - before_io);
-        delete h264_buf;
-        h264_buf = nullptr;
+        // delete h264_buf;
+        // h264_buf = nullptr;
+
+        av_packet_unref(packet);
 
         if (cv::waitKey(1) == 'q') // delay 1ms
             break;
@@ -264,8 +281,10 @@ int main(int argc, char **argv)
 
     printf("Average:\t %f fps/s\n", float(frames) / float(endTime - startTime) * 1000.0);
     #endif
-    pclose(ffmpegPipe);
+
+    // pclose(ffmpegPipe);
     capture.release();
+    destory();
 
     return 0;
 }

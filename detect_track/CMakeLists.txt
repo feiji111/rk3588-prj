@@ -27,7 +27,15 @@ message(STATUS "    version: ${OpenCV_VERSION}")
 message(STATUS "    libraries: ${OpenCV_LIBRARIES}")
 message(STATUS "    include path: ${OpenCV_INCLUDE_DIRS}")
 
-include_directories(${OpenCV_INCLUDE_DIRS})
+set(ENV{PKG_CONFIG_PATH} "/usr/local/f/ffmpeg-rk/lib/pkgconfig")
+find_package(PkgConfig REQUIRED)
+# pkg_check_modules(FFMPEG REQUIRED libavfilter libavformat libavcodec libavutil libswresample libswscale libpostproc)
+pkg_check_modules(FFMPEG REQUIRED libavformat libavcodec libavutil libswscale libavdevice libswresample libpostproc)
+message(STATUS "    version: ${FFMPEG_VERSION}")
+message(STATUS "    libraries: ${FFMPEG_LDFLAGS}")
+message(STATUS "    include path: ${FFMPEG_INCLUDE_DIRS}")
+
+include_directories(${OpenCV_INCLUDE_DIRS} ${FFMPEG_INCLUDE_DIRS})
 
 set(
     include_libs  
@@ -36,7 +44,6 @@ set(
     ${PROJECT_SOURCE_DIR}/include/rknn_api/
     ${PROJECT_SOURCE_DIR}/include/threadpool/
     ${PROJECT_SOURCE_DIR}/include/mpp/
-    ${PROJECT_SOURCE_DIR}/include/osal/
     ${ROCKCHIP_VPU_INCLUDE_DIRS}
     ${ROCKCHIP_MPP_INCLUDE_DIRS}
 )
@@ -62,7 +69,7 @@ set(
 )
 
 # debug
-# add_definitions("-g")
+add_definitions("-g")
 
-target_link_libraries(detect_track ${OpenCV_LIBS})
+target_link_libraries(detect_track ${OpenCV_LIBRARIES} ${FFMPEG_LDFLAGS})
 target_link_libraries(detect_track ${dynamic_libs})

@@ -84,7 +84,7 @@ int main(int argc, char*argv[]) {
         if(result < 0) {
             printf("error result!\n");
         } else {
-            printf("prediction: %s\n", label[result]);
+            // printf("prediction: %s\n", label[result]);
         }
         cv::imshow("Camera", img);
         cv::imshow("After resize", output);
