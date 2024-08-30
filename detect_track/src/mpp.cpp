@@ -456,6 +456,7 @@ cv::VideoCapture capture_init(Command &cmd) {
         capture.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'));
         capture.set(cv::CAP_PROP_FRAME_WIDTH, width);
         capture.set(cv::CAP_PROP_FRAME_HEIGHT, height);
+        // capture.set(cv::CAP_PROP_FPS, 30);
     }
     else {
         capture.open(src.c_str(), cv::CAP_FFMPEG);

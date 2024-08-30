@@ -203,13 +203,13 @@ int main(int argc, char **argv)
 
         cv::Mat resultYUV;
 
-        cv::cvtColor(dets.img, resultYUV, cv::COLOR_BGR2YUV_YV12);
+        cv::cvtColor(dets.img, resultYUV, cv::COLOR_RGB2YUV_YV12);
         // uchar *h264_buf = nullptr;
         // int buf_len = 0;
         // YuvtoH264(int_width, int_height, resultYUV, h264_buf, buf_len); 
         // std::cout << dets.img.rows << ' ' << dets.img.cols << std::endl;
-        // gettimeofday(&io_time, nullptr);
-        // auto before_io = io_time.tv_sec * 1000 + io_time.tv_usec / 1000;
+        gettimeofday(&io_time, nullptr);
+        auto before_io = io_time.tv_sec * 1000 + io_time.tv_usec / 1000;
         // fwrite(dets.img.data, 1, dets.img.total() * dets.img.elemSize(), ffmpegPipe);
 
         // fwrite(h264_buf, 1, buf_len, ffmpegPipe);
@@ -223,10 +223,10 @@ int main(int argc, char **argv)
 
         // av_packet_unref(&packet);
 
-        // gettimeofday(&io_time, nullptr);
-        // auto after_io = io_time.tv_sec * 1000 + io_time.tv_usec / 1000;
+        gettimeofday(&io_time, nullptr);
+        auto after_io = io_time.tv_sec * 1000 + io_time.tv_usec / 1000;
 
-        // printf("i/o time: %ldms\n", after_io - before_io);
+        printf("i/o time: %ldms\n", after_io - before_io);
         // delete h264_buf;
         // h264_buf = nullptr;
 
