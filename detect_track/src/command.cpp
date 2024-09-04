@@ -10,7 +10,8 @@ Command::Command(): url(""),
     fps(30), 
     capture_name("x11grab"), 
     protocol("rtsp"), 
-    trans_protocol("udp") {}
+    trans_protocol("udp"),
+    mode("detection") {}
 
 // Getter method implementations
 std::string Command::getUrl() const {
@@ -75,6 +76,14 @@ std::string Command::getTrackModelHead() const {
 
 std::string Command::getTrackModelBackbone() const {
     return track_model_backbone;
+}
+
+std::string Command::getMode() const {
+    return mode;
+}
+
+std::string Command::getBinaryModel() const {
+    return binary_model;
 }
 
 // Setter method implementations
@@ -142,6 +151,14 @@ void Command::setTrackModelBackbone(const std::string &track_model_head) {
     this->track_model_head = track_model_head;
 }
 
+void Command::setMode(const std::string &mode) {
+    this->mode = mode;
+}
+
+void Command::setBinaryModel(const std::string &model_path) {
+    this->binary_model = model_path;
+}
+
 Command process_command(int argc,char * argv[]) {
     Command res = Command();
     for(int i=1;i<argc;i++){
@@ -194,6 +211,12 @@ Command process_command(int argc,char * argv[]) {
         }
         if(flag == "-track_backbone" && i + 1 < argc) {
             res.setTrackModelBackbone(argv[i + 1]);
+        }
+        if(flag == "-binary_model" && i + 1 < argc) {
+            res.setBinaryModel(argv[i + 1]);
+        }
+        if(flag == "-mode" && i + 1 < argc) {
+            res.setMode(argv[i + 1]);
         }
     }
     return res;

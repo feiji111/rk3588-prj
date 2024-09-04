@@ -5,7 +5,7 @@
 #include "opencv2/imgcodecs.hpp"
 #include "opencv2/imgproc.hpp"
 
-#include "postprocess.h"
+#include "postprocess-detection.h"
 #include "im2d.h"
 #include "rga.h"
 

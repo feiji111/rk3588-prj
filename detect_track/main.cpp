@@ -24,7 +24,10 @@ extern "C" {
 
 #include "box.h"
 #include "common.h"
-#include "model.h"
+#include "model-detection.h"
+#include "inference-classification.h"
+#include "preprocess-classification.h"
+#include "postprocess-classification.h"
 #include "rknnPool.hpp"
 #include "rknn_api.h"
 #include "mpp/mpp-v2.h"
@@ -32,10 +35,11 @@ extern "C" {
 
 extern AVPacket *packet;
 
+bool isTracking = false;
+
 struct MouseData {
-    frameDets* dets;
-    cv::VideoCapture* capture;
-    cv::Ptr<cv::TrackerNano>* tracker;
+    bool clicked;
+    int x, y;
 };
 
 bool pointInRectangle(int x, int y, const cv::Rect& rect) 
@@ -43,90 +47,40 @@ bool pointInRectangle(int x, int y, const cv::Rect& rect)
     return (x >= rect.x && x <= (rect.x + rect.width) && y >= rect.y && y <= (rect.y + rect.height));
 }
 
-void onMouseClick(int event, int x, int y, int flags, void* userdata) 
-{
-    MouseData* data = (MouseData*)userdata;
-    if (event == cv::EVENT_LBUTTONDOWN) 
-    {
-        cv::destroyAllWindows();
-        cv::VideoCapture capture = *data->capture;
-        cv::Ptr<cv::TrackerNano> tracker = *data->tracker;
-        frameDets dets =*data->dets;
-        cv::Rect bbox;
-
-        for (const auto& rect: dets.dets.results)
-        {
-            if (pointInRectangle(x, y, rect.box))
-            {
-                rectangle(dets.img, cv::Point(rect.box.x, rect.box.y), cv::Point(rect.box.x + rect.box.width, rect.box.y + rect.box.height), cv::Scalar(255, 0, 0), 2);
-                tracker->init(dets.img, rect.box);
-
-                break;
-            }
-        }
-
-        while(capture.isOpened()) {
-            cv::Mat img;
-            if (capture.read(img) == false)
-                break;
-            
-            tracker->update(dets.img, bbox);            
-            cv::rectangle(dets.img, bbox, cv::Scalar(0, 0, 0), 3);
-            cv::imshow("Camera FPS", dets.img);
-            if (cv::waitKey(1) == 'q')
-                break;
-        }
-        cv::destroyAllWindows();
-    }
-}
+char *label[] = {"airplane", "automobile", "bird", "cat", "deer", "dog", "frog", "horse", "ship", "truck"};
 
 int main(int argc, char **argv)
 {
     Command cmd = process_command(argc, argv);
-    // if (argc != 6)
-    // {
-    //     printf("Usage: %s <detection_model> <cameraID/video_path> <RTSP-url> <width> <height>\n", argv[0]);
-    //     return -1;
-    // }
-    //push stream
-    // std::string rtsp_dest = argv[3];
-    // std::string width = argv[4];
-    // std::string height = argv[5];
-    // std::string resolution = width + 'x' + height;
+    std::string mode = cmd.getMode();
+
     int int_width, int_height;
     int_width = cmd.getWidth();
     int_height = cmd.getHeight();
 
-    // std::string ffmpegCommand = "/usr/local/ffmpeg/bin/ffmpeg -re -f rawvideo -pix_fmt bgr24 -s " + resolution + " -i - -c:v libx264 -r 25 -pix_fmt yuv420p -preset veryfast -tune zerolatency -f rtsp -rtsp_transport udp " + rtsp_dest;
-    // std::string ffmpegCommand = "/usr/local/ffmpeg/bin/ffmpeg -f rawvideo -pix_fmt yuv420p -r 25 -s " + resolution + " -i - -c:v copy -f rtsp -rtsp_transport udp " + rtsp_dest;
-    // std::string ffmpegCommand = "/usr/local/ffmpeg/bin/ffmpeg -r 60 -i - -r 60 -c:v copy -f rtsp -rtsp_transport tcp " + rtsp_dest;
-
-    // printf("Running command: %s\n", ffmpegCommand.c_str());
-
-    // FILE* ffmpegPipe = popen(ffmpegCommand.c_str(), "w");
-    // if(!ffmpegPipe) {
-    //     fprintf(stderr, "Failed to open pipe for pushing stream.\n");
-    //     return -1;
-    // }
 
     //创建Linux FIFO文件
     // ::unlink("./test.264");
     // ::mkfifo("./test.264", O_CREAT | O_EXCL | 777);
     // FILE *fp_output = fopen("./test.264", "w+b");
 
+    std::string binary_model = cmd.getBinaryModel();
     std::string detection_model = cmd.getDetectionModel();
     std::string track_model_head = cmd.getTrackModelHead();
     std::string track_model_backbone = cmd.getTrackModelBackbone();
 
     int threadNum = 6;
     rknnPool<rkYolov5s, cv::Mat, frameDets> testPool(detection_model, threadNum);
-    // rknnPool<FeatureTensor, cv::Mat, cv::Mat> reidPool(trk_model, threadNum);
     
     if (testPool.init() != 0)
     {
         printf("rknnPool init fail!\n");
         return -1;
     }
+
+    //init classification model
+    rknn_app_context_t app_ctx;
+    init_model(binary_model.c_str(), &app_ctx);
 
     //init NanoTracker
     cv::TrackerNano::Params params;
@@ -137,10 +91,8 @@ int main(int argc, char **argv)
 
     //init mouse
     MouseData mouseData;
-    mouseData.tracker = &tracker;
 
     cv::namedWindow("Camera");
-    cv::setMouseCallback("Camera", onMouseClick, &mouseData);
 
     cv::VideoCapture capture;
     capture = capture_init(cmd);
@@ -156,49 +108,69 @@ int main(int argc, char **argv)
     int frames = 0;
     cv::Rect bbox;
 
+    rknn_output **outputs;
+    outputs = (rknn_output**)malloc(sizeof(rknn_output*));
+
     while (capture.isOpened())
     {  
-        cv::Mat img;
+        cv::Mat img, output, img_rgb;
         frameDets dets;
         if (capture.read(img) == false)
             break;
         dets.img = img;
-        #ifdef DEBUG
-        gettimeofday(&time1, nullptr);
-        auto beforeInference = time1.tv_sec * 1000 + time1.tv_usec / 1000;
-        #endif
+        
+        if(mode == "detection") {
+            #ifdef DEBUG
+            gettimeofday(&time1, nullptr);
+            auto beforeInference = time1.tv_sec * 1000 + time1.tv_usec / 1000;
+            #endif
 
-        if (testPool.put(dets.img) != 0)
+            if (testPool.put(dets.img) != 0)
+                    break;
+            
+            if (frames >= threadNum && testPool.get(dets) != 0)
                 break;
         
-        if (frames >= threadNum && testPool.get(dets) != 0)
-            break;
-    
-        //draw box
-        char text[256];
-        char fps[256];
-        mouseData.dets = &dets;
-        for (int i = 0; i < dets.dets.results.size(); i++) {
-            DetectBox *det_result = &(dets.dets.results[i]);
-            sprintf(text, "%.1f%%", det_result->confidence * 100);
-            int x1 = det_result->box.x;
-            int y1 = det_result->box.y;
-            int x2 = x1 + det_result->box.width;
-            int y2 = y1 + det_result->box.height;
-            rectangle(dets.img, cv::Point(x1, y1), cv::Point(x2, y2), cv::Scalar(0, 0, 0), 3);
-            putText(dets.img, text, cv::Point(x1, y1 + 12), cv::FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(0, 255, 0));
+            //draw box
+            char text[256];
+            char fps[256];
+
+            for (int i = 0; i < dets.dets.results.size(); i++) {
+                DetectBox *det_result = &(dets.dets.results[i]);
+                sprintf(text, "%.1f%%", det_result->confidence * 100);
+                int x1 = det_result->box.x;
+                int y1 = det_result->box.y;
+                int x2 = x1 + det_result->box.width;
+                int y2 = y1 + det_result->box.height;
+                rectangle(dets.img, cv::Point(x1, y1), cv::Point(x2, y2), cv::Scalar(0, 0, 0), 3);
+                putText(dets.img, text, cv::Point(x1, y1 + 12), cv::FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(0, 255, 0));
+            }
+            // cv::rectangle(dets.img, bbox, cv::Scalar(0, 0, 0), 3);         
+            #ifdef DEBUG
+            gettimeofday(&time1, nullptr);
+            auto afterInference = time1.tv_sec * 1000 + time1.tv_usec / 1000;
+            
+            sprintf(fps, "FPS: %d", (int)(1000.0 / float(afterInference - beforeInference)));
+            
+            cv::putText(dets.img, fps, cv::Point(16, 32), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 0, 255), 2);
+            // cv::imshow("Camera", dets.img);
+            
+            #endif
+        } else if(mode == "classification") {
+            cv::cvtColor(dets.img, img_rgb, cv::COLOR_BGR2RGB);
+            // fwrite(img.data, 1, img.total() * img.elemSize(), ffmpeg_process);
+
+            output = pre_process(img_rgb, app_ctx);
+            
+            inference_model(&app_ctx, output, outputs);
+
+            int result = post_process(&app_ctx, *outputs);
+            if(result < 0) {
+                printf("error result!\n");
+            } else {
+                printf("prediction: %s\n", label[result]);
+            }            
         }
-        // cv::rectangle(dets.img, bbox, cv::Scalar(0, 0, 0), 3);         
-        #ifdef DEBUG
-        gettimeofday(&time1, nullptr);
-        auto afterInference = time1.tv_sec * 1000 + time1.tv_usec / 1000;
-        
-        sprintf(fps, "FPS: %d", (int)(1000.0 / float(afterInference - beforeInference)));
-        
-        cv::putText(dets.img, fps, cv::Point(16, 32), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 0, 255), 2);
-        // cv::imshow("Camera", dets.img);
-        
-        #endif
 
 
         cv::Mat resultYUV;
@@ -208,8 +180,8 @@ int main(int argc, char **argv)
         // int buf_len = 0;
         // YuvtoH264(int_width, int_height, resultYUV, h264_buf, buf_len); 
         // std::cout << dets.img.rows << ' ' << dets.img.cols << std::endl;
-        gettimeofday(&io_time, nullptr);
-        auto before_io = io_time.tv_sec * 1000 + io_time.tv_usec / 1000;
+        // gettimeofday(&io_time, nullptr);
+        // auto before_io = io_time.tv_sec * 1000 + io_time.tv_usec / 1000;
         // fwrite(dets.img.data, 1, dets.img.total() * dets.img.elemSize(), ffmpegPipe);
 
         // fwrite(h264_buf, 1, buf_len, ffmpegPipe);
@@ -223,10 +195,10 @@ int main(int argc, char **argv)
 
         // av_packet_unref(&packet);
 
-        gettimeofday(&io_time, nullptr);
-        auto after_io = io_time.tv_sec * 1000 + io_time.tv_usec / 1000;
+        // gettimeofday(&io_time, nullptr);
+        // auto after_io = io_time.tv_sec * 1000 + io_time.tv_usec / 1000;
 
-        printf("i/o time: %ldms\n", after_io - before_io);
+        // printf("i/o time: %ldms\n", after_io - before_io);
         // delete h264_buf;
         // h264_buf = nullptr;
 
@@ -236,22 +208,22 @@ int main(int argc, char **argv)
             break;
         frames++;
 
-        // if(mouseData.clicked)
-        // {
-        //     // cout << mouseData.x << " " << mouseData.y << endl;
-        //     for (const auto& rect: dets.dets.results)
-        //     {
-        //         if (pointInRectangle(mouseData.x, mouseData.y, rect.box))
-        //         {
-        //             rectangle(img, cv::Point(rect.box.x, rect.box.y), cv::Point(rect.box.x + rect.box.width, rect.box.y + rect.box.height), cv::Scalar(255, 0, 0), 2);
-        //             tracker->init(dets.img, rect.box);
+        if(mouseData.clicked)
+        {
+            // cout << mouseData.x << " " << mouseData.y << endl;
+            for (const auto& rect: dets.dets.results)
+            {
+                if (pointInRectangle(mouseData.x, mouseData.y, rect.box))
+                {
+                    rectangle(img, cv::Point(rect.box.x, rect.box.y), cv::Point(rect.box.x + rect.box.width, rect.box.y + rect.box.height), cv::Scalar(255, 0, 0), 2);
+                    tracker->init(dets.img, rect.box);
 
-        //             isTracking = true;
-        //             break;
-        //         }
-        //     }
+                    isTracking = true;
+                    break;
+                }
+            }
 
-        // }
+        }
 
         #ifdef DEBUG
         if (frames % 120 == 0)

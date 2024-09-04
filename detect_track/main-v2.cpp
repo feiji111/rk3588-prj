@@ -14,7 +14,7 @@
 #include "opencv2/imgproc/imgproc.hpp"
 #include <opencv2/tracking.hpp>
 #include <opencv2/core/ocl.hpp>
-#include "model.h"
+#include "model-detection.h"
 #include "rknnPool.hpp"
 
 // #include "deepsort.h"

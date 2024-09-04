@@ -6,11 +6,13 @@
 #include "opencv2/imgproc/imgproc.hpp"
 
 #include "coreNum.h"
-#include "model.h"
+#include "model-detection.h"
 #include "common.h"
 #include "rknn_api.h"
-#include "postprocess.h"
-#include "preprocess.h"
+#include "postprocess-detection.h"
+#include "preprocess-detection.h"
+#include "postprocess-classification.h"
+#include "preprocess-classification.h"
 
 static void dump_tensor_attr(rknn_tensor_attr *attr)
 {

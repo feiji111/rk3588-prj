@@ -23,9 +23,11 @@ private:
     std::string trans_protocol; // 传输协议 TCP/UDP
 
     //DNN model
+    std::string mode;
     std::string detection_model;
     std::string track_model_head;
     std::string track_model_backbone;
+    std::string binary_model;
 
 public:
     Command();
@@ -47,6 +49,8 @@ public:
     std::string getDetectionModel() const;
     std::string getTrackModelHead() const;
     std::string getTrackModelBackbone() const;
+    std::string getMode() const;
+    std::string getBinaryModel() const;
 
     // Setter methods
     void setUrl(const std::string& url);
@@ -65,6 +69,8 @@ public:
     void setDetectionModel(const std::string& model_path);
     void setTrackModelHead(const std::string& model_path);
     void setTrackModelBackbone(const std::string& model_path);
+    void setMode(const std::string& model_path);
+    void setBinaryModel(const std::string& model_path);
 };
 
 Command process_command(int argc,char * argv[]);
