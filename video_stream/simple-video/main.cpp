@@ -6,8 +6,8 @@ int main(int argc, char**argv) {
     char* camera = argv[1];
     cv::VideoCapture capture;
     capture.open(camera[0] - '0', cv::CAP_V4L2);
-    capture.set(cv::CAP_PROP_FRAME_WIDTH, 1920);
-    capture.set(cv::CAP_PROP_FRAME_HEIGHT, 1080);
+    capture.set(cv::CAP_PROP_FRAME_WIDTH, 1280);
+    capture.set(cv::CAP_PROP_FRAME_HEIGHT, 720);
     capture.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'));
 
     cv::namedWindow("Camera");
